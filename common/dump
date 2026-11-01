@@ -81,6 +81,23 @@ _require_legacy_v2_format()
 }
 
 #
+# Require xfsdump to accept dump levels up to and including $1.
+# xfsdump rejects an out of range -l before doing anything else, and
+# names the highest level it supports when it does.
+#
+_require_xfsdump_level()
+{
+    local want="$1"
+    local max=""
+
+    max=`$XFSDUMP_PROG -JF -l 999999 -f /dev/null 2>&1 |
+	sed -n -e 's/.*-l argument must be between 0 and \([0-9]*\).*/\1/p'`
+    [ -n "$max" ] || _notrun "cannot determine xfsdump maximum dump level"
+    [ "$max" -ge "$want" ] || \
+	_notrun "xfsdump dump level $want required (supports 0-$max)"
+}
+
+#
 # do a remote/local mt
 #
 _mt()

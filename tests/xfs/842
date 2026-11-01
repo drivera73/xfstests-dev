@@ -1,0 +1,83 @@
+#! /bin/bash
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (c) 2026 Diego Rivera.  All Rights Reserved.
+#
+# FS QA Test No. 842
+#
+# Test multilevel dumps and cumulative restores at dump levels above 9, up
+# to the maximum of 254, and that a level beyond that is rejected.
+# This procedure is cribbed from:
+#     xfs/064: test multilevel dump and restores with hardlinks
+#
+. ./common/preamble
+_begin_fstest dump auto
+
+# Override the default cleanup function.
+_cleanup()
+{
+	_cleanup_dump
+	cd /
+	rm -f $tmp.*
+}
+
+# Import common functions.
+. ./common/filter
+. ./common/dump
+
+_require_scratch
+_require_xfsdump_level 254
+
+_scratch_mkfs_xfs >>$seqres.full
+_scratch_mount
+
+_create_dumpdir_hardlinks 3 >>$seqres.full
+
+# Cross the old limit of 9, then go up to the maximum. Each dump is at a
+# higher level than the one before it, so each is based on the previous one.
+levels="0 1 9 10 11 99 253 254"
+
+echo "Do the incremental dumps"
+for i in $levels; do
+	if [ $i -gt 0 ]; then
+		sleep 2
+		_modify_level $i
+	fi
+
+	_stable_fs
+	sleep 2
+
+	echo "********* level $i ***********" >>$seqres.full
+	_do_dump_file -f $tmp.df.level$i -l $i | \
+		grep -E '^xfsdump: (level|Dump Status)'
+done
+
+echo "Dump at a level beyond the maximum"
+$XFSDUMP_PROG -JF -l 255 -f /dev/null $SCRATCH_MNT 2>&1 | \
+	tee -a $seqres.full | \
+	sed -n -e 's/^.*\(-l argument must be\)/\1/p'
+
+echo "Levels recorded in the inventory"
+$XFSDUMP_PROG -I depth=2 | tee -a $seqres.full | \
+	$AWK_PROG '/level:/ { l = l (l == "" ? "" : " ") $2 } END { print l }'
+echo "Inventory sessions at level 254"
+$XFSDUMP_PROG -I depth=2,level=254 | \
+	$AWK_PROG '/level:/ { l = l (l == "" ? "" : " ") $2 } END { print l }'
+echo "Inventory sessions at level 255 (any level)"
+$XFSDUMP_PROG -I depth=2,level=255 | \
+	$AWK_PROG '/level:/ { l = l (l == "" ? "" : " ") $2 } END { print l }'
+
+echo "Do the cumulative restores"
+_prepare_restore_dir
+for i in $levels; do
+	echo "restoring from df.level$i"
+	_do_restore_file_cum -f $tmp.df.level$i | \
+		grep -E '^xfsrestore: (level|Restore Status)'
+done
+
+echo "Compare the restored tree with the original"
+diff -r $dump_dir $restore_dir/$dump_sdir >>$seqres.full 2>&1 || \
+	echo "restored tree differs from the original"
+
+# success, all done
+status=0
+exit

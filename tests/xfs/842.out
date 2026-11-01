@@ -1,0 +1,52 @@
+QA output created by 842
+Do the incremental dumps
+xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 1 incremental dump of HOSTNAME:SCRATCH_MNT based on level 0 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 9 incremental dump of HOSTNAME:SCRATCH_MNT based on level 1 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 10 incremental dump of HOSTNAME:SCRATCH_MNT based on level 9 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 11 incremental dump of HOSTNAME:SCRATCH_MNT based on level 10 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 99 incremental dump of HOSTNAME:SCRATCH_MNT based on level 11 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 253 incremental dump of HOSTNAME:SCRATCH_MNT based on level 99 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+xfsdump: level 254 incremental dump of HOSTNAME:SCRATCH_MNT based on level 253 dump begun DATE
+xfsdump: Dump Status: SUCCESS
+Dump at a level beyond the maximum
+-l argument must be between 0 and 254
+Levels recorded in the inventory
+0 1 9 10 11 99 253 254
+Inventory sessions at level 254
+254
+Inventory sessions at level 255 (any level)
+0 1 9 10 11 99 253 254
+Do the cumulative restores
+restoring from df.level0
+xfsrestore: level: 0
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level1
+xfsrestore: level: 1
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level9
+xfsrestore: level: 9
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level10
+xfsrestore: level: 10
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level11
+xfsrestore: level: 11
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level99
+xfsrestore: level: 99
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level253
+xfsrestore: level: 253
+xfsrestore: Restore Status: SUCCESS
+restoring from df.level254
+xfsrestore: level: 254
+xfsrestore: Restore Status: SUCCESS
+Compare the restored tree with the original
