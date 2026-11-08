@@ -1,0 +1,2 @@
+Needs the xfsdump series at https://lore.kernel.org/linux-xfs/<message-id>/;
+xfs/842 is skipped with released xfsdump.
